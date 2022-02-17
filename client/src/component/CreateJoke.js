@@ -12,7 +12,6 @@ function CreateJoke() {
 
     const onButtonClickHandler = (e) => {
         const jokeData = {
-            author: 'Chy',
             content: joke,
         };
 

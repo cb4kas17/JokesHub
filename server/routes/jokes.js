@@ -4,6 +4,8 @@ const router = express.Router();
 const User = require('../models/user');
 const Jokes = require('../models/jokes');
 
+const isAuth = require('../middleware/is-auth');
+
 router.get('/allJokes', async (req, res) => {
     try {
         const jokes = await Jokes.find();

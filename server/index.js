@@ -2,20 +2,21 @@ const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-
+const cookieParser = require('cookie-parser');
 const app = express();
 require('dotenv').config();
 
 //middlewares
 app.use(bodyParser.json()); //application/json, parses incoming json data
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cookieParser());
 app.use(cors());
-
+app.use(express.json());
 //routes
 const homeRoute = require('./routes/home');
 const jokesRoute = require('./routes/jokes');
-app.use('/api', jokesRoute);
 app.use('/api', homeRoute);
+app.use('/api', jokesRoute);
 
 //error route
 app.use((req, res) => {

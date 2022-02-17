@@ -5,6 +5,7 @@ const commentsSchema = new Schema(
     {
         author: { type: String, required: true },
         comment: { type: String, required: true },
+        joke_id: { type: String, required: true },
     },
     { timestamps: true }
 );

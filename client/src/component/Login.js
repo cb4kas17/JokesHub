@@ -38,7 +38,7 @@ function Login(props) {
         try {
             const login = async () => {
                 try {
-                    const response = await axios.post('http://localhost:4000/api/login', userData);
+                    const response = await axios.post('http://localhost:4000/api/', userData);
                     if (response.data.success) {
                         console.log('logged in');
                         navigate('/jokes');
