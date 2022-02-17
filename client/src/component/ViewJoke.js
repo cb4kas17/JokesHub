@@ -36,8 +36,11 @@ function ViewJoke() {
 
     const navigate = useNavigate();
     const [joke, setJoke] = useState([]);
+    const [comment, setComment] = useState([]);
+    const [commentContent, setCommentContent] = useState('');
     const { jokeID } = useParams();
     console.log(jokeID);
+
     useEffect(() => {
         async function fetchData() {
             try {
@@ -45,12 +48,20 @@ function ViewJoke() {
                 const data = await response.data.joke;
                 console.log(data);
                 setJoke(data);
+                setComment(COMMENTS);
+                console.log(comment);
             } catch (error) {
                 console.log(error);
             }
         }
         fetchData();
     }, []);
+
+    const postComment = (e) => {
+        // COMMENTS.push({ author: 'chy', comment: e.target.value });
+        setComment([{ author: 'chy', comment: commentContent }, ...comment]);
+        setCommentContent('');
+    };
     return (
         <div className={styles.container}>
             <Nav />
@@ -66,8 +77,16 @@ function ViewJoke() {
                     </div>
                 </Card>
                 <div className={styles.comment_input_container}>
-                    <textarea type="text" className={styles.comment_input} placeholder="Enter comment" />
-                    <Button className={styles.btn} onClick={() => {}}>
+                    <textarea
+                        type="text"
+                        className={styles.comment_input}
+                        placeholder="Enter comment"
+                        onChange={(e) => {
+                            setCommentContent(e.target.value);
+                        }}
+                        value={commentContent}
+                    />
+                    <Button className={styles.btn} onClick={postComment}>
                         <FontAwesomeIcon icon={faPaperPlane} size="xl" className={styles.send} />
                     </Button>
                 </div>
@@ -75,7 +94,7 @@ function ViewJoke() {
                     <h1 className={styles.header}>
                         Comments <FontAwesomeIcon icon={faComment} size="sm" className={styles.commentIcon} />
                     </h1>
-                    {COMMENTS.map((item, i) => (
+                    {comment.map((item, i) => (
                         <div className={styles.comment_container} key={i}>
                             <div className={styles.comment_author}>From: {item.author}</div>
                             <div className={styles.comment}>{item.comment}</div>
