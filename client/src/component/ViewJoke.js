@@ -6,102 +6,133 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Card from './Layout/Card';
 import { faPaperPlane, faQuoteLeft, faQuoteRight, faComment } from '@fortawesome/free-solid-svg-icons';
 import styles from './viewJoke.module.css';
-
+import NoComments from './NoComments';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
 function ViewJoke() {
-    // let DUMMY = {
-    //     id: 1,
-    //     author: 'Chy',
-    //     content: 'When my local barista handed me my change, one coin stood out. “Look at that. You rarely get one of these old wheat pennies nowadays,” I said, tapping the sheaf... ',
-    // };
-
-    let COMMENTS = [
-        {
-            author: 'LANIE',
-            comment: 'Thats goThats gooThats gooThats gooThats gooThats gooThats gooThats gooThats gooThats gooThats gooThats gooThats gooThats gooThats gooThats gooThats gooThats gooThats goood',
-        },
-        { author: 'Bicoy', comment: 'Weird Joke' },
-        { author: 'Wigi', comment: 'asfasfasf' },
-        { author: 'Wigi', comment: 'asfasfasfsaf' },
-        { author: 'Wigi', comment: 'xcvxcvxcvcx' },
-        { author: 'Wigi', comment: 'asfasfassf' },
-        { author: 'Wigi', comment: 'dgfdfgdfgfdg' },
-        { author: 'Wigi', comment: 'zxczxcxzcxz' },
-        { author: 'Wigi', comment: 'bxvxcvcxsv' },
-        { author: 'Wigi', comment: 'bcvbcbv' },
-        { author: 'Wigi', comment: 'hsdfgsgsdgsg' },
-        { author: 'Wigi', comment: 'asgasawew' },
-    ];
-
     const navigate = useNavigate();
     const [joke, setJoke] = useState([]);
     const [comment, setComment] = useState([]);
     const [commentContent, setCommentContent] = useState('');
+    const [user, setUser] = useState([]);
+    const [refresh, setRefresh] = useState(false);
     const { jokeID } = useParams();
-    console.log(jokeID);
 
     useEffect(() => {
-        async function fetchData() {
+        async function fetchJoke() {
             try {
-                const response = await axios.get(`http://localhost:4000/api/allJokes/${jokeID}`);
+                const response = await axios.get(`http://localhost:4000/api/allJokes/${jokeID}`, {
+                    headers: {
+                        'x-access-token': localStorage.getItem('token'),
+                    },
+                });
                 const data = await response.data.joke;
-                console.log(data);
+                console.log(response.data);
                 setJoke(data);
-                setComment(COMMENTS);
-                console.log(comment);
+
+                if (response.data === 'login again') {
+                    navigate('/');
+                }
             } catch (error) {
                 console.log(error);
             }
         }
-        fetchData();
-    }, []);
+        async function fetchComment() {
+            try {
+                const responsex = await axios.get(`http://localhost:4000/api/jokes/comment/${jokeID}`, {
+                    headers: {
+                        'x-access-token': localStorage.getItem('token'),
+                    },
+                });
+                const commentData = await responsex.data.comment;
+                setComment(commentData);
+                console.log(commentData);
+                setRefresh(false);
+            } catch (error) {
+                console.log(error);
+            }
+        }
+        async function fetchUser() {
+            try {
+                const responsey = await axios.get(`http://localhost:4000/api/getUser`, {
+                    headers: {
+                        'x-access-token': localStorage.getItem('token'),
+                    },
+                });
+                const userData = await responsey.data.user;
+                setUser(userData);
+                console.log('user data: ' + userData.userName);
+            } catch (error) {
+                console.log(error);
+            }
+        }
+        fetchJoke();
+        fetchComment();
+        fetchUser();
+    }, [navigate, refresh, jokeID]);
 
-    const postComment = (e) => {
-        // COMMENTS.push({ author: 'chy', comment: e.target.value });
-        setComment([{ author: 'chy', comment: commentContent }, ...comment]);
-        setCommentContent('');
+    const postComment = async () => {
+        const commentData = {
+            author: user.fullName,
+            comment: commentContent,
+        };
+        try {
+            const response = await axios.post(`http://localhost:4000/api/jokes/comment/${jokeID}`, commentData, {
+                headers: {
+                    'x-access-token': localStorage.getItem('token'),
+                },
+            });
+            const data = await response.data.comment;
+            setCommentContent('');
+            setRefresh(true);
+            console.log(data);
+        } catch (error) {
+            console.log(error);
+        }
     };
     return (
         <div className={styles.container}>
             <Nav />
             <NavBurger type="jokes" />
-            <div className={styles.content_container}>
-                <Card>
-                    <div className={styles.joke_content_container}>
-                        <div className={styles.joke_author}>By: {joke.author}</div>
-                        <div className={styles.joke_content}>
-                            <FontAwesomeIcon icon={faQuoteLeft} size="sm" className={styles.quoteLeft} />
-                            {joke.content} <FontAwesomeIcon icon={faQuoteRight} size="sm" className={styles.quoteRight} />
+            {joke && (
+                <div className={styles.content_container}>
+                    <Card>
+                        <div className={styles.joke_content_container}>
+                            <div className={styles.joke_author}>By: {joke.author}</div>
+                            <div className={styles.joke_content}>
+                                <FontAwesomeIcon icon={faQuoteLeft} size="sm" className={styles.quoteLeft} />
+                                {joke.content} <FontAwesomeIcon icon={faQuoteRight} size="sm" className={styles.quoteRight} />
+                            </div>
                         </div>
+                    </Card>
+                    <div className={styles.comment_input_container}>
+                        <textarea
+                            type="text"
+                            className={styles.comment_input}
+                            placeholder="Enter comment"
+                            onChange={(e) => {
+                                setCommentContent(e.target.value);
+                            }}
+                            value={commentContent}
+                        />
+                        <Button className={styles.btn} onClick={postComment}>
+                            <FontAwesomeIcon icon={faPaperPlane} size="xl" className={styles.send} />
+                        </Button>
                     </div>
-                </Card>
-                <div className={styles.comment_input_container}>
-                    <textarea
-                        type="text"
-                        className={styles.comment_input}
-                        placeholder="Enter comment"
-                        onChange={(e) => {
-                            setCommentContent(e.target.value);
-                        }}
-                        value={commentContent}
-                    />
-                    <Button className={styles.btn} onClick={postComment}>
-                        <FontAwesomeIcon icon={faPaperPlane} size="xl" className={styles.send} />
-                    </Button>
+                    <div className={styles.comment_section_container}>
+                        <h1 className={styles.header}>
+                            Comments <FontAwesomeIcon icon={faComment} size="sm" className={styles.commentIcon} />
+                        </h1>
+                        {comment.length === 0 && <NoComments />}
+                        {comment.map((item, i) => (
+                            <div className={styles.comment_container} key={i}>
+                                <div className={styles.comment_author}>From: {item.author}</div>
+                                <div className={styles.comment}>{item.comment}</div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
-                <div className={styles.comment_section_container}>
-                    <h1 className={styles.header}>
-                        Comments <FontAwesomeIcon icon={faComment} size="sm" className={styles.commentIcon} />
-                    </h1>
-                    {comment.map((item, i) => (
-                        <div className={styles.comment_container} key={i}>
-                            <div className={styles.comment_author}>From: {item.author}</div>
-                            <div className={styles.comment}>{item.comment}</div>
-                        </div>
-                    ))}
-                </div>
-            </div>
+            )}
         </div>
     );
 }

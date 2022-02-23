@@ -1,26 +1,89 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './editProfile.module.css';
 import NavBurger from './Layout/NavBurger';
 import Button from './Layout/Button';
 import Nav from './Layout/Nav';
+import axios from 'axios';
+import Modal from './Layout/Modal';
+import { useNavigate } from 'react-router-dom';
 function EditProfile() {
-    const [enteredUser, setEnteredUser] = useState('');
+    const navigate = useNavigate();
+
     const [enteredName, setEnteredName] = useState('');
     const [enteredOldPW, setEnteredOldPW] = useState('');
     const [enteredNewPW, setEnteredNewPW] = useState('');
+    const [user, setUser] = useState([]);
+    const [updatedUser, setUpdatedUser] = useState(false);
+    const [pwChanged, setPwChanged] = useState(false);
+    useEffect(() => {
+        async function fetchData() {
+            try {
+                const response = await axios.get(`http://localhost:4000/api/getUser`, {
+                    headers: {
+                        'x-access-token': localStorage.getItem('token'),
+                    },
+                });
 
-    const userChangeHandler = (e) => {
-        setEnteredUser(e.target.value);
-    };
-    const nameChangeHandler = (e) => {
-        setEnteredName(e.target.value);
-    };
+                const data = await response.data.user;
+                console.log(data);
+                setUser(data);
+                setEnteredName(data.fullName);
+                if (response.data === 'login again') {
+                    navigate('/');
+                }
+            } catch (error) {
+                console.log(error);
+                navigate('/');
+            }
+        }
+        fetchData();
+    }, [updatedUser, pwChanged, navigate]);
 
-    const oldPWChangeHandler = (e) => {
-        setEnteredOldPW(e.target.value);
+    const updateButtonHandler = async (e) => {
+        let data = {
+            name: enteredName,
+        };
+        try {
+            const response = await axios.put(`http://localhost:4000/api/updateProfile/${user.userName}`, data, {
+                headers: {
+                    'x-access-token': localStorage.getItem('token'),
+                },
+            });
+            const updatedData = await response.data.userData;
+            console.log('data' + updatedData);
+            console.log(response);
+            if (response.data.success) {
+                console.log('updated succcessfully');
+                setUpdatedUser(true);
+            } else {
+                console.log('user not updated');
+            }
+        } catch (error) {
+            console.log(error);
+        }
     };
-    const newPWChangeHandler = (e) => {
-        setEnteredNewPW(e.target.value);
+    const changePWButtonHandler = async (e) => {
+        let data = {
+            oldPassword: enteredOldPW,
+            newPassword: enteredNewPW,
+        };
+        try {
+            const response = await axios.put(`http://localhost:4000/api/changePassword/${user.userName}`, data, {
+                headers: {
+                    'x-access-token': localStorage.getItem('token'),
+                },
+            });
+            const updatedPW = await response.data.updatedUser;
+            console.log('log' + updatedPW);
+            if (response.data.success) {
+                console.log('PW changed successfully');
+                setPwChanged(true);
+            } else {
+                console.log('PW not updated');
+            }
+        } catch (error) {
+            console.log(error);
+        }
     };
     return (
         <div className={styles.container}>
@@ -31,22 +94,80 @@ function EditProfile() {
                 <h1 className={styles.header}>Edit Profile</h1>
                 <div className={styles.first_content}>
                     <div className={styles.input_fields}>
-                        <input type="text" id="username" placeholder="Username" value={enteredUser} onChange={userChangeHandler} />
-                        <input type="text" id="name" placeholder="Full Name" value={enteredName} onChange={nameChangeHandler} />
+                        <h4 className={styles.name}>Full Name:</h4>
+                        <input
+                            type="text"
+                            id="name"
+                            placeholder="Full Name"
+                            value={enteredName}
+                            onChange={(e) => {
+                                setEnteredName(e.target.value);
+                            }}
+                        />
                     </div>
                     <div>
-                        <Button>Update</Button>
+                        <Button onClick={updateButtonHandler}>Update</Button>
                     </div>
                 </div>
                 <div className={styles.second_content}>
                     <div className={styles.input_fields}>
-                        <input type="password" id="old-password" placeholder="Old Password" value={enteredOldPW} onChange={oldPWChangeHandler} />
-                        <input type="password" id="new-password" placeholder="New Password" value={enteredNewPW} onChange={newPWChangeHandler} />
+                        <input
+                            type="password"
+                            id="old-password"
+                            placeholder="Old Password"
+                            value={enteredOldPW}
+                            onChange={(e) => {
+                                setEnteredOldPW(e.target.value);
+                            }}
+                        />
+                        <input
+                            type="password"
+                            id="new-password"
+                            placeholder="New Password"
+                            value={enteredNewPW}
+                            onChange={(e) => {
+                                setEnteredNewPW(e.target.value);
+                            }}
+                        />
                     </div>
                     <div>
-                        <Button>Change Password</Button>
+                        <Button onClick={changePWButtonHandler}>Change Password</Button>
                     </div>
                 </div>
+                {updatedUser && (
+                    <Modal className={styles.modalDesign}>
+                        <div className={styles.messageContainer}>
+                            <h2 className={styles.messageHeader}>User details updated</h2>
+                            <div className={styles.button_container}>
+                                <Button
+                                    className={styles.modalButton}
+                                    onClick={() => {
+                                        setUpdatedUser(false);
+                                    }}
+                                >
+                                    Okay
+                                </Button>
+                            </div>
+                        </div>
+                    </Modal>
+                )}
+                {pwChanged && (
+                    <Modal className={styles.modalDesign}>
+                        <div className={styles.messageContainer}>
+                            <h2 className={styles.messageHeader}>Password successfully changed</h2>
+                            <div className={styles.button_container}>
+                                <Button
+                                    className={styles.modalButton}
+                                    onClick={() => {
+                                        navigate('/login');
+                                    }}
+                                >
+                                    Okay
+                                </Button>
+                            </div>
+                        </div>
+                    </Modal>
+                )}
             </div>
         </div>
     );

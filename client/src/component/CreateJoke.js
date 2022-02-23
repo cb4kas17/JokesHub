@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './createJoke.module.css';
 import NavBurger from './Layout/NavBurger';
 import Button from './Layout/Button';
@@ -9,16 +9,42 @@ function CreateJoke() {
     const navigate = useNavigate();
 
     const [joke, setJoke] = useState('');
+    const [user, setUser] = useState('');
 
+    useEffect(() => {
+        async function fetchData() {
+            try {
+                const response = await axios.get('http://localhost:4000/api/getUser', {
+                    headers: {
+                        'x-access-token': localStorage.getItem('token'),
+                    },
+                });
+                const data = await response.data.user;
+                setUser(data.fullName);
+                console.log(data.fullName);
+                if (response.data === 'login again') {
+                    navigate('/');
+                }
+            } catch (error) {
+                console.log(error);
+                navigate('/');
+            }
+        }
+        fetchData();
+    }, [navigate]);
+    let jokeData = {
+        author: user,
+        content: joke,
+    };
     const onButtonClickHandler = (e) => {
-        const jokeData = {
-            content: joke,
-        };
-
         try {
             const postJoke = async () => {
                 try {
-                    const response = await axios.post('http://localhost:4000/api/createJokes', jokeData);
+                    const response = await axios.post('http://localhost:4000/api/createJokes', jokeData, {
+                        headers: {
+                            'x-access-token': localStorage.getItem('token'),
+                        },
+                    });
                     if (response.data.success) {
                         console.log('posted');
                         navigate('/jokes');

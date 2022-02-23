@@ -39,8 +39,10 @@ function Login(props) {
             const login = async () => {
                 try {
                     const response = await axios.post('http://localhost:4000/api/', userData);
+                    console.log(response);
                     if (response.data.success) {
                         console.log('logged in');
+                        localStorage.setItem('token', response.data.accessToken);
                         navigate('/jokes');
                     }
                     if (response.data === 'No username found') {

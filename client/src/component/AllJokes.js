@@ -8,6 +8,7 @@ import Card from './Layout/Card';
 import { faEye, faQuoteLeft, faQuoteRight } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import NoJokesFound from './NoJokesFound';
 
 // let DUMMY = [
 //     {
@@ -29,16 +30,24 @@ function AllJokes() {
     useEffect(() => {
         async function fetchData() {
             try {
-                const response = await axios.get('http://localhost:4000/api/allJokes');
+                const response = await axios.get('http://localhost:4000/api/allJokes', {
+                    headers: {
+                        'x-access-token': localStorage.getItem('token'),
+                    },
+                });
                 const data = await response.data.jokes;
                 console.log(data);
+                console.log(response);
                 setJokes(data);
+                if (response.data === 'login again') {
+                    navigate('/');
+                }
             } catch (error) {
                 console.log(error);
             }
         }
         fetchData();
-    }, []);
+    }, [navigate]);
 
     const onViewHandler = (id) => {
         navigate(`/jokes/${id}`);
@@ -47,31 +56,36 @@ function AllJokes() {
         <div className={styles.container}>
             <Nav />
             <NavBurger type="jokes" />
+            {jokes && (
+                <ul className={styles.all_jokes_container}>
+                    {jokes.length !== 0 ? (
+                        jokes.map((item, i) => (
+                            <Card className={styles.single_joke_container} key={i}>
+                                <div className={styles.joke_content_container}>
+                                    <div className={styles.date}>{item.createdAt.toLocaleString().slice(0, 10)}</div>
+                                    <div className={styles.joke_author}>By: {item.author}</div>
+                                    <div className={styles.joke_content}>
+                                        <FontAwesomeIcon icon={faQuoteLeft} size="sm" className={styles.quoteLeft} />
+                                        {item.content} <FontAwesomeIcon icon={faQuoteRight} size="sm" className={styles.quoteRight} />
+                                    </div>
+                                </div>
 
-            <ul className={styles.all_jokes_container}>
-                {jokes.map((item, i) => (
-                    <Card className={styles.single_joke_container} key={i}>
-                        <div className={styles.joke_content_container}>
-                            <div className={styles.date}>{item.createdAt.toLocaleString().slice(0, 10)}</div>
-                            <div className={styles.joke_author}>By: {item.author}</div>
-                            <div className={styles.joke_content}>
-                                <FontAwesomeIcon icon={faQuoteLeft} size="sm" className={styles.quoteLeft} />
-                                {item.content} <FontAwesomeIcon icon={faQuoteRight} size="sm" className={styles.quoteRight} />
-                            </div>
-                        </div>
-
-                        <div className={styles.joke_button}>
-                            <Button
-                                onClick={() => {
-                                    onViewHandler(item._id);
-                                }}
-                            >
-                                <FontAwesomeIcon icon={faEye} size="lg" />
-                            </Button>
-                        </div>
-                    </Card>
-                ))}
-            </ul>
+                                <div className={styles.joke_button}>
+                                    <Button
+                                        onClick={() => {
+                                            onViewHandler(item._id);
+                                        }}
+                                    >
+                                        <FontAwesomeIcon icon={faEye} size="lg" />
+                                    </Button>
+                                </div>
+                            </Card>
+                        ))
+                    ) : (
+                        <NoJokesFound />
+                    )}
+                </ul>
+            )}
         </div>
     );
 }

@@ -15,8 +15,10 @@ app.use(express.json());
 //routes
 const homeRoute = require('./routes/home');
 const jokesRoute = require('./routes/jokes');
+const commentsRoute = require('./routes/comments');
 app.use('/api', homeRoute);
 app.use('/api', jokesRoute);
+app.use('/api', commentsRoute);
 
 //error route
 app.use((req, res) => {
