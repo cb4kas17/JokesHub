@@ -6,12 +6,14 @@ import Nav from './Layout/Nav';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
 import Modal from './Layout/Modal';
+import ClipLoader from 'react-spinners/ClipLoader';
 
 function EditJoke() {
     const { jokeID } = useParams();
     const navigate = useNavigate();
     const [joke, setJoke] = useState('');
     const [confirmation, setConfirmation] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         async function fetchData() {
@@ -25,6 +27,7 @@ function EditJoke() {
                 console.log(data);
                 console.log(response);
                 setJoke(data.content);
+                setLoading(false);
                 if (response.data === 'login again') {
                     navigate('/');
                 }
@@ -76,50 +79,59 @@ function EditJoke() {
         <div className={styles.container}>
             <Nav />
             <NavBurger type="jokes" />
-            <div className={styles.content_container}>
-                <h1 className={styles.header}>Edit your joke</h1>
-                <textarea
-                    type="text"
-                    className={styles.joke_input}
-                    placeholder="Enter your joke"
-                    value={joke}
-                    onChange={(e) => {
-                        setJoke(e.target.value);
-                    }}
-                />
-                <div className={styles.button_container}>
-                    <Button className={styles.btn} onClick={onUpdateHandler}>
-                        Update
-                    </Button>
-                    <Button
-                        className={styles.btn}
-                        onClick={() => {
-                            setConfirmation(true);
-                        }}
-                    >
-                        Delete
-                    </Button>
+            {loading ? (
+                <div className={styles.loadingContainer}>
+                    <ClipLoader size={100} color={'#F1C815'} loading={loading} />
                 </div>
-            </div>
-            {confirmation && (
-                <Modal className={styles.modalDesign}>
-                    <div className={styles.messageContainer}>
-                        <h2 className={styles.messageHeader}>Are you sure you want to delete this joke?</h2>
+            ) : (
+                <div>
+                    {' '}
+                    <div className={styles.content_container}>
+                        <h1 className={styles.header}>Edit your joke</h1>
+                        <textarea
+                            type="text"
+                            className={styles.joke_input}
+                            placeholder="Enter your joke"
+                            value={joke}
+                            onChange={(e) => {
+                                setJoke(e.target.value);
+                            }}
+                        />
                         <div className={styles.button_container}>
-                            <Button className={styles.modalButton} onClick={onDeleteHandler}>
-                                Yes
+                            <Button className={styles.btn} onClick={onUpdateHandler}>
+                                Update
                             </Button>
                             <Button
-                                className={styles.modalButton}
+                                className={styles.btn}
                                 onClick={() => {
-                                    setConfirmation(false);
+                                    setConfirmation(true);
                                 }}
                             >
-                                No
+                                Delete
                             </Button>
                         </div>
                     </div>
-                </Modal>
+                    {confirmation && (
+                        <Modal className={styles.modalDesign}>
+                            <div className={styles.messageContainer}>
+                                <h2 className={styles.messageHeader}>Are you sure you want to delete this joke?</h2>
+                                <div className={styles.button_container}>
+                                    <Button className={styles.modalButton} onClick={onDeleteHandler}>
+                                        Yes
+                                    </Button>
+                                    <Button
+                                        className={styles.modalButton}
+                                        onClick={() => {
+                                            setConfirmation(false);
+                                        }}
+                                    >
+                                        No
+                                    </Button>
+                                </div>
+                            </div>
+                        </Modal>
+                    )}
+                </div>
             )}
         </div>
     );

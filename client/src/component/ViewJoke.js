@@ -9,6 +9,8 @@ import styles from './viewJoke.module.css';
 import NoComments from './NoComments';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
+import ClipLoader from 'react-spinners/ClipLoader';
+
 function ViewJoke() {
     const navigate = useNavigate();
     const [joke, setJoke] = useState([]);
@@ -17,6 +19,8 @@ function ViewJoke() {
     const [user, setUser] = useState([]);
     const [refresh, setRefresh] = useState(false);
     const { jokeID } = useParams();
+    const [loading, setLoading] = useState(true);
+    const [commentLoading, setCommentLoading] = useState(true);
 
     useEffect(() => {
         async function fetchJoke() {
@@ -29,7 +33,7 @@ function ViewJoke() {
                 const data = await response.data.joke;
                 console.log(response.data);
                 setJoke(data);
-
+                setLoading(false);
                 if (response.data === 'login again') {
                     navigate('/');
                 }
@@ -47,6 +51,7 @@ function ViewJoke() {
                 const commentData = await responsex.data.comment;
                 setComment(commentData);
                 console.log(commentData);
+                setCommentLoading(false);
                 setRefresh(false);
             } catch (error) {
                 console.log(error);
@@ -94,43 +99,59 @@ function ViewJoke() {
         <div className={styles.container}>
             <Nav />
             <NavBurger type="jokes" />
-            {joke && (
-                <div className={styles.content_container}>
-                    <Card>
-                        <div className={styles.joke_content_container}>
-                            <div className={styles.joke_author}>By: {joke.author}</div>
-                            <div className={styles.joke_content}>
-                                <FontAwesomeIcon icon={faQuoteLeft} size="sm" className={styles.quoteLeft} />
-                                {joke.content} <FontAwesomeIcon icon={faQuoteRight} size="sm" className={styles.quoteRight} />
+            {loading ? (
+                <div className={styles.loadingContainer}>
+                    <ClipLoader size={100} color={'#F1C815'} loading={loading} />
+                </div>
+            ) : (
+                <div>
+                    {joke && (
+                        <div className={styles.content_container}>
+                            <Card>
+                                <div className={styles.joke_content_container}>
+                                    <div className={styles.joke_author}>By: {joke.author}</div>
+                                    <div className={styles.joke_content}>
+                                        <FontAwesomeIcon icon={faQuoteLeft} size="sm" className={styles.quoteLeft} />
+                                        {joke.content} <FontAwesomeIcon icon={faQuoteRight} size="sm" className={styles.quoteRight} />
+                                    </div>
+                                </div>
+                            </Card>
+                            <div className={styles.comment_input_container}>
+                                <textarea
+                                    type="text"
+                                    className={styles.comment_input}
+                                    placeholder="Enter comment"
+                                    onChange={(e) => {
+                                        setCommentContent(e.target.value);
+                                    }}
+                                    value={commentContent}
+                                />
+                                <Button className={styles.btn} onClick={postComment}>
+                                    <FontAwesomeIcon icon={faPaperPlane} size="xl" className={styles.send} />
+                                </Button>
+                            </div>
+                            <div className={styles.comment_section_container}>
+                                <h1 className={styles.header}>
+                                    Comments <FontAwesomeIcon icon={faComment} size="sm" className={styles.commentIcon} />
+                                </h1>
+                                {commentLoading ? (
+                                    <div className={styles.loadingContainer}>
+                                        <ClipLoader size={100} color={'#F1C815'} loading={loading} />
+                                    </div>
+                                ) : (
+                                    <div>
+                                        {comment.length === 0 && <NoComments />}
+                                        {comment.map((item, i) => (
+                                            <div className={styles.comment_container} key={i}>
+                                                <div className={styles.comment_author}>From: {item.author}</div>
+                                                <div className={styles.comment}>{item.comment}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         </div>
-                    </Card>
-                    <div className={styles.comment_input_container}>
-                        <textarea
-                            type="text"
-                            className={styles.comment_input}
-                            placeholder="Enter comment"
-                            onChange={(e) => {
-                                setCommentContent(e.target.value);
-                            }}
-                            value={commentContent}
-                        />
-                        <Button className={styles.btn} onClick={postComment}>
-                            <FontAwesomeIcon icon={faPaperPlane} size="xl" className={styles.send} />
-                        </Button>
-                    </div>
-                    <div className={styles.comment_section_container}>
-                        <h1 className={styles.header}>
-                            Comments <FontAwesomeIcon icon={faComment} size="sm" className={styles.commentIcon} />
-                        </h1>
-                        {comment.length === 0 && <NoComments />}
-                        {comment.map((item, i) => (
-                            <div className={styles.comment_container} key={i}>
-                                <div className={styles.comment_author}>From: {item.author}</div>
-                                <div className={styles.comment}>{item.comment}</div>
-                            </div>
-                        ))}
-                    </div>
+                    )}
                 </div>
             )}
         </div>

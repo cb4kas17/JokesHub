@@ -3,9 +3,27 @@ import styles from './navBurger.module.css';
 import { NavLink } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBars, faXmark } from '@fortawesome/free-solid-svg-icons';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 function NavBurger(props) {
+    const navigate = useNavigate();
     const [clicked, setClicked] = useState(false);
 
+    const logoutHanlder = async () => {
+        const response = await axios.get('http://localhost:4000/api/logout', {
+            headers: {
+                'x-access-token': localStorage.getItem('token'),
+            },
+        });
+
+        if (response.data.success) {
+            localStorage.removeItem('token');
+            navigate('/login');
+        } else {
+            setClicked(false);
+            console.log('logout error');
+        }
+    };
     return (
         <div className={styles.nav}>
             <input
@@ -70,6 +88,11 @@ function NavBurger(props) {
                         <li className={styles.nav_item}>
                             <NavLink to="/editProfile" className={styles.nav_link}>
                                 Edit Profile
+                            </NavLink>
+                        </li>
+                        <li className={styles.nav_item}>
+                            <NavLink to="/login" className={styles.nav_link} onClick={logoutHanlder}>
+                                Logout
                             </NavLink>
                         </li>
                     </ul>

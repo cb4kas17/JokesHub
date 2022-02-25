@@ -6,6 +6,7 @@ import Nav from './Layout/Nav';
 import axios from 'axios';
 import Modal from './Layout/Modal';
 import { useNavigate } from 'react-router-dom';
+import ClipLoader from 'react-spinners/ClipLoader';
 function EditProfile() {
     const navigate = useNavigate();
 
@@ -15,6 +16,7 @@ function EditProfile() {
     const [user, setUser] = useState([]);
     const [updatedUser, setUpdatedUser] = useState(false);
     const [pwChanged, setPwChanged] = useState(false);
+    const [loading, setLoading] = useState(true);
     useEffect(() => {
         async function fetchData() {
             try {
@@ -28,6 +30,7 @@ function EditProfile() {
                 console.log(data);
                 setUser(data);
                 setEnteredName(data.fullName);
+                setLoading(false);
                 if (response.data === 'login again') {
                     navigate('/');
                 }
@@ -89,86 +92,93 @@ function EditProfile() {
         <div className={styles.container}>
             <Nav />
             <NavBurger type="jokes" />
-
-            <div className={styles.content_container}>
-                <h1 className={styles.header}>Edit Profile</h1>
-                <div className={styles.first_content}>
-                    <div className={styles.input_fields}>
-                        <h4 className={styles.name}>Full Name:</h4>
-                        <input
-                            type="text"
-                            id="name"
-                            placeholder="Full Name"
-                            value={enteredName}
-                            onChange={(e) => {
-                                setEnteredName(e.target.value);
-                            }}
-                        />
-                    </div>
-                    <div>
-                        <Button onClick={updateButtonHandler}>Update</Button>
-                    </div>
+            {loading ? (
+                <div className={styles.loadingContainer}>
+                    <ClipLoader size={100} color={'#F1C815'} loading={loading} />
                 </div>
-                <div className={styles.second_content}>
-                    <div className={styles.input_fields}>
-                        <input
-                            type="password"
-                            id="old-password"
-                            placeholder="Old Password"
-                            value={enteredOldPW}
-                            onChange={(e) => {
-                                setEnteredOldPW(e.target.value);
-                            }}
-                        />
-                        <input
-                            type="password"
-                            id="new-password"
-                            placeholder="New Password"
-                            value={enteredNewPW}
-                            onChange={(e) => {
-                                setEnteredNewPW(e.target.value);
-                            }}
-                        />
-                    </div>
-                    <div>
-                        <Button onClick={changePWButtonHandler}>Change Password</Button>
-                    </div>
-                </div>
-                {updatedUser && (
-                    <Modal className={styles.modalDesign}>
-                        <div className={styles.messageContainer}>
-                            <h2 className={styles.messageHeader}>User details updated</h2>
-                            <div className={styles.button_container}>
-                                <Button
-                                    className={styles.modalButton}
-                                    onClick={() => {
-                                        setUpdatedUser(false);
+            ) : (
+                <div>
+                    <div className={styles.content_container}>
+                        <h1 className={styles.header}>Edit Profile</h1>
+                        <div className={styles.first_content}>
+                            <h4 className={styles.name}>Display Name:</h4>
+                            <div className={styles.input_fields}>
+                                <input
+                                    type="text"
+                                    id="name"
+                                    placeholder="Full Name"
+                                    value={enteredName}
+                                    onChange={(e) => {
+                                        setEnteredName(e.target.value);
                                     }}
-                                >
-                                    Okay
-                                </Button>
+                                />
+                            </div>
+                            <div>
+                                <Button onClick={updateButtonHandler}>Update</Button>
                             </div>
                         </div>
-                    </Modal>
-                )}
-                {pwChanged && (
-                    <Modal className={styles.modalDesign}>
-                        <div className={styles.messageContainer}>
-                            <h2 className={styles.messageHeader}>Password successfully changed</h2>
-                            <div className={styles.button_container}>
-                                <Button
-                                    className={styles.modalButton}
-                                    onClick={() => {
-                                        navigate('/login');
+                        <div className={styles.second_content}>
+                            <div className={styles.input_fields}>
+                                <input
+                                    type="password"
+                                    id="old-password"
+                                    placeholder="Old Password"
+                                    value={enteredOldPW}
+                                    onChange={(e) => {
+                                        setEnteredOldPW(e.target.value);
                                     }}
-                                >
-                                    Okay
-                                </Button>
+                                />
+                                <input
+                                    type="password"
+                                    id="new-password"
+                                    placeholder="New Password"
+                                    value={enteredNewPW}
+                                    onChange={(e) => {
+                                        setEnteredNewPW(e.target.value);
+                                    }}
+                                />
+                            </div>
+                            <div>
+                                <Button onClick={changePWButtonHandler}>Change Password</Button>
                             </div>
                         </div>
-                    </Modal>
-                )}
-            </div>
+                        {updatedUser && (
+                            <Modal className={styles.modalDesign}>
+                                <div className={styles.messageContainer}>
+                                    <h2 className={styles.messageHeader}>User details updated</h2>
+                                    <div className={styles.button_container}>
+                                        <Button
+                                            className={styles.modalButton}
+                                            onClick={() => {
+                                                setUpdatedUser(false);
+                                            }}
+                                        >
+                                            Okay
+                                        </Button>
+                                    </div>
+                                </div>
+                            </Modal>
+                        )}
+                        {pwChanged && (
+                            <Modal className={styles.modalDesign}>
+                                <div className={styles.messageContainer}>
+                                    <h2 className={styles.messageHeader}>Password successfully changed</h2>
+                                    <div className={styles.button_container}>
+                                        <Button
+                                            className={styles.modalButton}
+                                            onClick={() => {
+                                                navigate('/login');
+                                            }}
+                                        >
+                                            Okay
+                                        </Button>
+                                    </div>
+                                </div>
+                            </Modal>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

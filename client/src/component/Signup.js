@@ -104,7 +104,7 @@ function Signup() {
                                           ${styles.invalid}`
                         }
                     >
-                        <input type="text" id="name" placeholder="Full name" value={enteredName} onChange={nameChangeHandler} onBlur={nameBlurHandler} required={true} />
+                        <input type="text" id="name" placeholder="Display Name" value={enteredName} onChange={nameChangeHandler} onBlur={nameBlurHandler} required={true} />
                         {userExist && <p className={styles.errorMes}>Username already exist</p>}
                     </div>
 

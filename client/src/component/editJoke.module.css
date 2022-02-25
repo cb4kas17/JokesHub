@@ -3,6 +3,17 @@
     padding: 20rem 10rem 10rem 10rem;
     font-family: 'Roboto', sans-serif;
     z-index: 10;
+    position: relative;
+}
+.loadingContainer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 .content_container {
     display: flex;

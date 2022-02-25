@@ -10,7 +10,16 @@
     flex-direction: column;
     align-items: center;
 }
-
+.loadingContainer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 /* .single_joke_container {
     width: 123rem;
     min-height: 23.5rem;

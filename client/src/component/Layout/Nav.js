@@ -13,13 +13,13 @@ function Nav() {
                     className={styles.logo}
                     style={{ cursor: 'pointer' }}
                     onClick={() => {
-                        navigate('/');
+                        navigate('/jokes');
                     }}
                 />
                 <h1
                     className={styles.header}
                     onClick={() => {
-                        navigate('/');
+                        navigate('/jokes');
                     }}
                     style={{ cursor: 'pointer' }}
                 >

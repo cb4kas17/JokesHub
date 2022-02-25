@@ -3,6 +3,11 @@
     padding: 20rem 10rem 10rem 10rem;
     font-family: 'Roboto', sans-serif;
     z-index: 10;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
 }
 
 .all_jokes_container {

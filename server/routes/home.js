@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const bcrypt = require('bcrypt');
 const isAuth = require('../middleware/is-auth');
+const Jokes = require('../models/jokes');
 router.post('/', async (req, res) => {
     try {
         const userData = await User.findOne({ userName: req.body.username });
@@ -68,8 +69,19 @@ router.put('/updateProfile/:id', isAuth, async (req, res) => {
                 },
             }
         );
+
+        const jokesData = await Jokes.updateMany(
+            { username: updateUserData.userName },
+            {
+                $set: {
+                    author: req.body.name,
+                },
+            }
+        );
+
         // const accessToken = jwt.sign({ id: userData._id, username: userData.userName, name: userData.fullName }, 'secretKey', { expiresIn: '60m' });
         console.log('this is the data' + updateUserData);
+        console.log('jokes  ' + jokesData);
         res.json({ success: true, userData: updateUserData });
     } catch (error) {
         res.status(500).json({
@@ -99,6 +111,17 @@ router.put('/changePassword/:id', isAuth, async (req, res) => {
         } else {
             res.send('old password not matched');
         }
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+});
+
+router.get('/logout', isAuth, async (req, res) => {
+    try {
+        res.json({ success: true });
     } catch (error) {
         res.status(500).json({
             success: false,

@@ -9,10 +9,12 @@ import { faEye, faQuoteLeft, faQuoteRight, faUserEdit } from '@fortawesome/free-
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import NoJokesFound from './NoJokesFound';
+import ClipLoader from 'react-spinners/ClipLoader';
 
 function MyJokes(props) {
     const navigate = useNavigate();
     const [jokes, setJokes] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         async function fetchData() {
@@ -25,6 +27,7 @@ function MyJokes(props) {
                 const data = await response.data.myJokes;
                 setJokes(data);
                 console.log(data);
+                setLoading(false);
                 if (response.data === 'login again') {
                     navigate('/');
                 }
@@ -47,42 +50,50 @@ function MyJokes(props) {
             <Nav />
             <NavBurger type="jokes" />
             <h1 className={styles.header}>My Jokes</h1>
-            {jokes && (
-                <ul className={styles.all_jokes_container}>
-                    {jokes.length !== 0 ? (
-                        jokes.map((item, i) => (
-                            <Card className={styles.single_joke_container} key={i}>
-                                <div className={styles.date}>{item.createdAt.toLocaleString().slice(0, 10)}</div>
-                                <div className={styles.joke_content_container}>
-                                    <div className={styles.joke_content}>
-                                        <FontAwesomeIcon icon={faQuoteLeft} size="sm" className={styles.quoteLeft} />
-                                        {item.content} <FontAwesomeIcon icon={faQuoteRight} size="sm" className={styles.quoteRight} />
-                                    </div>
-                                </div>
-                                <div className={styles.joke_button}>
-                                    <Button
-                                        className={styles.btn}
-                                        onClick={() => {
-                                            onViewHandler(item._id);
-                                        }}
-                                    >
-                                        <FontAwesomeIcon icon={faEye} size="lg" />
-                                    </Button>
-                                    <Button
-                                        className={styles.btn}
-                                        onClick={() => {
-                                            onEditHandler(item._id);
-                                        }}
-                                    >
-                                        <FontAwesomeIcon icon={faUserEdit} size="lg" />
-                                    </Button>
-                                </div>
-                            </Card>
-                        ))
-                    ) : (
-                        <NoJokesFound />
+            {loading ? (
+                <div className={styles.loadingContainer}>
+                    <ClipLoader size={100} color={'#F1C815'} loading={loading} />
+                </div>
+            ) : (
+                <div>
+                    {jokes && (
+                        <ul className={styles.all_jokes_container}>
+                            {jokes.length !== 0 ? (
+                                jokes.map((item, i) => (
+                                    <Card className={styles.single_joke_container} key={i}>
+                                        <div className={styles.date}>{item.createdAt.toLocaleString().slice(0, 10)}</div>
+                                        <div className={styles.joke_content_container}>
+                                            <div className={styles.joke_content}>
+                                                <FontAwesomeIcon icon={faQuoteLeft} size="sm" className={styles.quoteLeft} />
+                                                {item.content} <FontAwesomeIcon icon={faQuoteRight} size="sm" className={styles.quoteRight} />
+                                            </div>
+                                        </div>
+                                        <div className={styles.joke_button}>
+                                            <Button
+                                                className={styles.btn}
+                                                onClick={() => {
+                                                    onViewHandler(item._id);
+                                                }}
+                                            >
+                                                <FontAwesomeIcon icon={faEye} size="lg" />
+                                            </Button>
+                                            <Button
+                                                className={styles.btn}
+                                                onClick={() => {
+                                                    onEditHandler(item._id);
+                                                }}
+                                            >
+                                                <FontAwesomeIcon icon={faUserEdit} size="lg" />
+                                            </Button>
+                                        </div>
+                                    </Card>
+                                ))
+                            ) : (
+                                <NoJokesFound />
+                            )}
+                        </ul>
                     )}
-                </ul>
+                </div>
             )}
         </div>
     );
