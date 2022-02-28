@@ -5,6 +5,7 @@ const User = require('../models/user');
 const bcrypt = require('bcrypt');
 const isAuth = require('../middleware/is-auth');
 const Jokes = require('../models/jokes');
+
 router.post('/', async (req, res) => {
     try {
         const userData = await User.findOne({ userName: req.body.username });

@@ -17,6 +17,7 @@ function EditProfile() {
     const [updatedUser, setUpdatedUser] = useState(false);
     const [pwChanged, setPwChanged] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [errorPrompt, setErrorPrompt] = useState(false);
     useEffect(() => {
         async function fetchData() {
             try {
@@ -70,22 +71,26 @@ function EditProfile() {
             oldPassword: enteredOldPW,
             newPassword: enteredNewPW,
         };
-        try {
-            const response = await axios.put(`http://localhost:4000/api/changePassword/${user.userName}`, data, {
-                headers: {
-                    'x-access-token': localStorage.getItem('token'),
-                },
-            });
-            const updatedPW = await response.data.updatedUser;
-            console.log('log' + updatedPW);
-            if (response.data.success) {
-                console.log('PW changed successfully');
-                setPwChanged(true);
-            } else {
-                console.log('PW not updated');
+        if (enteredNewPW.length > 7) {
+            try {
+                const response = await axios.put(`http://localhost:4000/api/changePassword/${user.userName}`, data, {
+                    headers: {
+                        'x-access-token': localStorage.getItem('token'),
+                    },
+                });
+                const updatedPW = await response.data.updatedUser;
+                console.log('log' + updatedPW);
+                if (response.data.success) {
+                    console.log('PW changed successfully');
+                    setPwChanged(true);
+                } else {
+                    console.log('PW not updated');
+                }
+            } catch (error) {
+                console.log(error);
             }
-        } catch (error) {
-            console.log(error);
+        } else {
+            setErrorPrompt(true);
         }
     };
     return (
@@ -137,6 +142,7 @@ function EditProfile() {
                                         setEnteredNewPW(e.target.value);
                                     }}
                                 />
+                                {errorPrompt && <p className={styles.errorMes}>Password should be at least 8 characters long</p>}
                             </div>
                             <div>
                                 <Button onClick={changePWButtonHandler}>Change Password</Button>

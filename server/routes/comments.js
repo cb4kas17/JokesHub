@@ -7,6 +7,7 @@ const Comment = require('../models/comments');
 
 const isAuth = require('../middleware/is-auth');
 
+
 router.post('/jokes/comment/:id', isAuth, async (req, res) => {
     try {
         const comment = new Comment({
